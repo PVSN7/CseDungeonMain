@@ -200,6 +200,53 @@
       margin: 0 -1rem;
       padding: 0 1rem;
     }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      .shadow-monarch-content {
+        padding: 0.5rem;
+      }
+
+      #tasks-container {
+        height: calc(100vh - 190px);
+      }
+
+      .flex.justify-between.items-center.p-6.pb-4 {
+        padding: 1rem 0.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      .flex.gap-2 {
+        width: 100%;
+        justify-content: flex-end;
+      }
+
+      .px-6.pb-4 {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        padding-bottom: 0.5rem;
+      }
+
+      .task-item {
+        padding: 0.75rem;
+      }
+
+      .task-content {
+        padding: 0.5rem;
+      }
+
+      .completed-tasks-header {
+        padding: 0.5rem 0;
+      }
+    }
+
+    @media (max-height: 600px) {
+      #tasks-container {
+        height: calc(100vh - 180px);
+      }
+    }
   </style>
 </head>
 <body>
@@ -208,14 +255,18 @@
       <div class="dungeon-border rounded-lg bg-dungeon-mid flex flex-col" style="height: 100%;">
         <div class="flex justify-between items-center p-6 pb-4">
           <h2 class="text-xl font-bold text-dungeon-text flex items-center">
-            <i class="fas fa-crown text-dungeon-accent mr-2"></i> SHADOW MONARCH'S QUESTS
+            <i class="fas fa-crown text-dungeon-accent mr-2"></i> 
+            <span class="hidden sm:inline">SHADOW MONARCH'S QUESTS</span>
+            <span class="sm:hidden">QUESTS</span>
           </h2>
           <div class="flex gap-2">
             <button id="authorize_button" class="text-sm bg-dungeon-accent hover:bg-opacity-90 text-white font-bold px-3 py-1 rounded transition flex items-center">
-              <i class="fas fa-sign-in-alt mr-1"></i> Sign In
+              <i class="fas fa-sign-in-alt mr-1"></i>
+              <span class="hidden sm:inline">Sign In</span>
             </button>
             <button id="signout_button" class="text-sm bg-dungeon-accent hover:bg-opacity-90 text-white font-bold px-3 py-1 rounded transition flex items-center" style="display: none;">
-              <i class="fas fa-sign-out-alt mr-1"></i> Sign Out
+              <i class="fas fa-sign-out-alt mr-1"></i>
+              <span class="hidden sm:inline">Sign Out</span>
             </button>
           </div>
         </div>
@@ -230,7 +281,8 @@
           <div class="flex flex-wrap">
             <input type="text" id="new-task" placeholder="New quest..." class="flex-grow bg-dungeon-light border border-dungeon-light text-dungeon-text px-4 py-2 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-dungeon-accent" disabled>
             <button id="add-task" class="bg-dungeon-accent hover:bg-opacity-90 text-white font-bold px-4 py-2 rounded-r-lg transition" disabled>
-              <i class="fas fa-plus"></i> Add
+              <i class="fas fa-plus"></i>
+              <span class="hidden sm:inline"> Add</span>
             </button>
           </div>
         </div>
