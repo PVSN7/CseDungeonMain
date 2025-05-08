@@ -6,267 +6,257 @@
   <title>Shadow Monarch's Quests</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-    
     :root {
-      --primary: #4f46e5;
-      --primary-dark: #4338ca;
-      --primary-light: #6366f1;
-      --dark: #1a1a2e;
-      --darker: #0f0f1a;
-      --light: #e2e8f0;
-      --gray: #6b7280;
-      --danger: #dc2626;
+      --dungeon-text: #e2e8f0;
+      --dungeon-accent: #6366f1;
+      --dungeon-light: #2a2a4a;
+      --dungeon-mid: #1a1a2e;
+      --dungeon-dark: #0f0f1a;
+      --dungeon-danger: #dc2626;
+      --dungeon-border: rgba(79, 70, 229, 0.3);
+    }
+    
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
     }
     
     body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
-      margin: 0;
-      padding: 0;
-      height: 100%;
+      font-family: 'Rajdhani', sans-serif;
+      background: var(--dungeon-dark);
+      color: var(--dungeon-text);
     }
     
-    .shadow-monarch-tasks {
-      width: 100%;
-      height: 100%;
-      background: var(--dark);
-      border: 1px solid var(--primary);
-      border-radius: 12px;
-      box-shadow: 0 0 25px rgba(79, 70, 229, 0.4);
-      color: var(--light);
-      padding: 1rem;
+    .dungeon-border {
+      border: 1px solid var(--dungeon-border);
+      box-shadow: 0 0 10px rgba(79, 70, 229, 0.2);
+    }
+    
+    .bg-dungeon-mid {
+      background-color: var(--dungeon-mid);
+    }
+    
+    .bg-dungeon-light {
+      background-color: var(--dungeon-light);
+    }
+    
+    .text-dungeon-text {
+      color: var(--dungeon-text);
+    }
+    
+    .text-dungeon-accent {
+      color: var(--dungeon-accent);
+    }
+    
+    .bg-dungeon-accent {
+      background-color: var(--dungeon-accent);
+    }
+    
+    .border-dungeon-light {
+      border-color: var(--dungeon-light);
+    }
+    
+    .complete-btn {
+      transition: all 0.2s;
+    }
+    
+    .complete-btn:hover {
+      border-color: var(--dungeon-accent);
+    }
+    
+    .complete-btn.completed {
+      background-color: var(--dungeon-accent);
+      border-color: var(--dungeon-accent);
+    }
+    
+    /* Strike-through animation */
+    .task-text-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .task-text {
+      position: relative;
+    }
+
+    .task-text.completed {
+      animation: strike 0.5s ease-out forwards;
+    }
+
+    @keyframes strike {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+        text-decoration: line-through;
+        text-decoration-thickness: 2px;
+      }
+      100% {
+        opacity: 0.7;
+        text-decoration: line-through;
+        text-decoration-thickness: 2px;
+      }
+    }
+
+    .task-item.completed {
+      transition: opacity 0.3s ease;
+    }
+    
+    #tasks-container {
+      height: calc(100vh - 220px);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--dungeon-accent) var(--dungeon-light);
+    }
+    
+    #tasks-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    #tasks-container::-webkit-scrollbar-track {
+      background: var(--dungeon-light);
+    }
+    
+    #tasks-container::-webkit-scrollbar-thumb {
+      background: var(--dungeon-accent);
+      border-radius: 3px;
+    }
+    
+    .shadow-monarch-container {
+      height: 100vh;
+      width: 100vw;
+      padding: 0;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
     }
     
-    .tasks-header {
+    .shadow-monarch-content {
+      flex-grow: 1;
       display: flex;
+      flex-direction: column;
+      padding: 1rem;
+    }
+    
+    /* Completed tasks dropdown styles */
+    .completed-tasks-dropdown {
+      border-top: 1px solid var(--dungeon-border);
+      margin: 0 -1rem;
+      padding: 0 1rem;
+    }
+    
+    .completed-tasks-header {
+      display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      border-bottom: 1px solid var(--primary);
-      padding-bottom: 0.75rem;
-      flex-shrink: 0;
-    }
-    
-    .tasks-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--light);
-      text-shadow: 0 0 8px var(--primary-light);
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .auth-btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 0.4rem 0.8rem;
+      padding: 0.75rem 0;
       cursor: pointer;
-      font-size: 0.875rem;
-      font-weight: 500;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-shrink: 0;
-    }
-    
-    .auth-btn:hover {
-      background: var(--primary-dark);
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
-    }
-    
-    .task-list-selector {
-      width: 100%;
-      background: #2a2a4a;
-      border: 1px solid var(--primary);
-      color: var(--light);
-      padding: 0.75rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      font-size: 0.9375rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      flex-shrink: 0;
-    }
-    
-    .task-input-container {
-      display: flex;
-      margin-bottom: 1rem;
-      gap: 0.5rem;
-      flex-shrink: 0;
-    }
-    
-    .task-input {
-      flex-grow: 1;
-      background: #2a2a4a;
-      border: 1px solid var(--primary);
-      color: var(--light);
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      font-size: 0.9375rem;
-      transition: all 0.2s;
-      min-width: 0; /* Allows input to shrink properly */
-    }
-    
-    .tasks-list {
-      flex-grow: 1;
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: var(--primary) var(--dark);
-      min-height: 100px; /* Minimum height when container is very small */
-    }
-    
-    /* Other styles remain the same as your original code */
-    .task-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.75rem;
-      margin-bottom: 0.5rem;
-      background: #2a2a4a;
-      border-radius: 8px;
-      transition: all 0.2s;
-      border-left: 3px solid transparent;
-    }
-    
-    .task-item:hover {
-      background: #3a3a5a;
-      border-left-color: var(--primary-light);
-      transform: translateX(2px);
-    }
-    
-    .task-content {
-      display: flex;
-      align-items: center;
-      flex-grow: 1;
-      gap: 0.75rem;
-      min-width: 0; /* Allows text to truncate properly */
-    }
-    
-    .task-checkbox {
-      width: 1.25rem;
-      height: 1.25rem;
-      accent-color: var(--primary);
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    
-    .task-text {
-      flex-grow: 1;
-      font-size: 0.9375rem;
-      word-break: break-word;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .completed {
-      text-decoration: line-through;
+      color: var(--dungeon-text);
       opacity: 0.7;
+      transition: all 0.2s;
     }
     
-    .task-due {
+    .completed-tasks-header:hover {
+      opacity: 1;
+    }
+    
+    .completed-tasks-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      margin: 0 -1rem;
+      padding: 0 1rem;
+    }
+    
+    .completed-tasks-content.show {
+      max-height: 1000px;
+    }
+    
+    .completed-count {
+      background-color: var(--dungeon-light);
+      border-radius: 9999px;
+      padding: 0.125rem 0.5rem;
       font-size: 0.75rem;
-      color: #a5b4fc;
-      margin-left: 0.5rem;
-      white-space: nowrap;
-      flex-shrink: 0;
     }
     
-    .task-actions {
-      display: flex;
-      gap: 0.5rem;
-      margin-left: 0.5rem;
-      flex-shrink: 0;
+    .rotate-180 {
+      transform: rotate(180deg);
+    }
+    
+    .task-item {
+      margin-left: 0;
+      margin-right: 0;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
     }
     
     .empty-state {
-      text-align: center;
-      padding: 1.5rem;
-      color: var(--gray);
-      font-size: 0.9375rem;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-    
-    /* Scrollbar styling */
-    .tasks-list::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    .tasks-list::-webkit-scrollbar-track {
-      background: var(--dark);
-      border-radius: 4px;
-    }
-    
-    .tasks-list::-webkit-scrollbar-thumb {
-      background: var(--primary);
-      border-radius: 4px;
-    }
-    
-    /* Responsive adjustments for very small containers */
-    @media (max-height: 500px) {
-      .tasks-header {
-        padding-bottom: 0.5rem;
-        margin-bottom: 0.5rem;
-      }
-      
-      .task-list-selector,
-      .task-input-container {
-        margin-bottom: 0.5rem;
-      }
-      
-      .task-item {
-        padding: 0.5rem;
-        margin-bottom: 0.25rem;
-      }
+      margin: 0 -1rem;
+      padding: 0 1rem;
     }
   </style>
 </head>
 <body>
-  <div class="shadow-monarch-tasks">
-    <div class="tasks-header">
-      <div class="tasks-title">
-        <i class="fas fa-crown mr-2"></i>
-        SHADOW MONARCH'S QUESTS
-      </div>
-      <button id="authorize_button" class="auth-btn">
-        <i class="fas fa-sign-in-alt"></i>
-        <span>Sign In</span>
-      </button>
-      <button id="signout_button" class="auth-btn" style="display: none;">
-        <i class="fas fa-sign-out-alt"></i>
-        <span>Sign Out</span>
-      </button>
-    </div>
-    
-    <select id="tasklists" class="task-list-selector" disabled>
-      <option value="">Sign in to load tasks</option>
-    </select>
-    
-    <div class="task-input-container">
-      <input type="text" id="new-task" class="task-input" placeholder="New quest..." disabled>
-      <button id="add-task" class="auth-btn" disabled>
-        <i class="fas fa-plus"></i>
-      </button>
-    </div>
-    
-    <div id="tasks" class="tasks-list">
-      <div class="empty-state">
-        <i class="fas fa-scroll mb-2 text-2xl"></i>
-        <div>Sign in to view your quests</div>
+  <div class="shadow-monarch-container">
+    <div class="shadow-monarch-content">
+      <div class="dungeon-border rounded-lg bg-dungeon-mid flex flex-col" style="height: 100%;">
+        <div class="flex justify-between items-center p-6 pb-4">
+          <h2 class="text-xl font-bold text-dungeon-text flex items-center">
+            <i class="fas fa-crown text-dungeon-accent mr-2"></i> SHADOW MONARCH'S QUESTS
+          </h2>
+          <div class="flex gap-2">
+            <button id="authorize_button" class="text-sm bg-dungeon-accent hover:bg-opacity-90 text-white font-bold px-3 py-1 rounded transition flex items-center">
+              <i class="fas fa-sign-in-alt mr-1"></i> Sign In
+            </button>
+            <button id="signout_button" class="text-sm bg-dungeon-accent hover:bg-opacity-90 text-white font-bold px-3 py-1 rounded transition flex items-center" style="display: none;">
+              <i class="fas fa-sign-out-alt mr-1"></i> Sign Out
+            </button>
+          </div>
+        </div>
+
+        <div class="px-6 pb-4">
+          <select id="tasklists" class="w-full bg-dungeon-light border border-dungeon-light text-dungeon-text rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-dungeon-accent" disabled>
+            <option value="">Sign in to load tasks</option>
+          </select>
+        </div>
+
+        <div class="px-6 pb-4">
+          <div class="flex flex-wrap">
+            <input type="text" id="new-task" placeholder="New quest..." class="flex-grow bg-dungeon-light border border-dungeon-light text-dungeon-text px-4 py-2 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-dungeon-accent" disabled>
+            <button id="add-task" class="bg-dungeon-accent hover:bg-opacity-90 text-white font-bold px-4 py-2 rounded-r-lg transition" disabled>
+              <i class="fas fa-plus"></i> Add
+            </button>
+          </div>
+        </div>
+
+        <div id="tasks-container" class="flex-grow overflow-y-auto">
+          <div id="tasks" class="space-y-0">
+            <div class="empty-state h-full flex flex-col items-center justify-center text-dungeon-text opacity-70 py-8">
+              <i class="fas fa-scroll text-3xl mb-2"></i>
+              <div>Sign in to view your quests</div>
+            </div>
+          </div>
+
+          <!-- Completed Tasks Dropdown (hidden by default) -->
+          <div id="completed-tasks-container" class="completed-tasks-dropdown hidden">
+            <div id="completed-tasks-header" class="completed-tasks-header">
+              <div class="flex items-center">
+                <i class="fas fa-chevron-down mr-2 transition-transform duration-200"></i>
+                <span>Completed</span>
+                <span id="completed-count" class="completed-count ml-2">0</span>
+              </div>
+            </div>
+            <div id="completed-tasks-content" class="completed-tasks-content">
+              <!-- Completed tasks will be inserted here -->
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -274,7 +264,6 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js"></script>
   <script>
-    // Your existing JavaScript code remains exactly the same
     const CLIENT_ID = '1048202385042-s67i9hr9b6ga6rkjfpqfmcsj1khgn5i5.apps.googleusercontent.com';
     const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/tasks/v1/rest';
     const SCOPES = 'https://www.googleapis.com/auth/tasks';
@@ -282,10 +271,9 @@
     let tokenClient, gapiInited = false, gisInited = false;
     let currentTaskListId = null;
     let allTasks = [];
+    let completedTasks = [];
 
-    // Initialize the widget
     function initTasksWidget() {
-      // Load the Google API client
       gapi.load('client', async () => {
         try {
           await gapi.client.init({
@@ -300,7 +288,6 @@
         }
       });
 
-      // Initialize Google Identity Services
       tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: CLIENT_ID,
         scope: SCOPES,
@@ -309,7 +296,6 @@
       gisInited = true;
       maybeEnableButtons();
 
-      // Set up event listeners
       document.getElementById('authorize_button').addEventListener('click', handleAuthClick);
       document.getElementById('signout_button').addEventListener('click', handleSignoutClick);
       document.getElementById('tasklists').addEventListener('change', loadTasks);
@@ -317,6 +303,16 @@
       document.getElementById('new-task').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') addTask();
       });
+
+      // Completed tasks dropdown toggle
+      document.getElementById('completed-tasks-header').addEventListener('click', toggleCompletedTasks);
+    }
+
+    function toggleCompletedTasks() {
+      const content = document.getElementById('completed-tasks-content');
+      const icon = document.querySelector('#completed-tasks-header i');
+      content.classList.toggle('show');
+      icon.classList.toggle('rotate-180');
     }
 
     function maybeEnableButtons() {
@@ -325,20 +321,19 @@
       }
     }
 
-    function showLoading(container, message = 'Loading...') {
-      container.innerHTML = `
-        <div class="empty-state">
-          <div class="loading-spinner mb-2"></div>
+    function showLoading(message = 'Loading...') {
+      document.getElementById('tasks').innerHTML = `
+        <div class="empty-state h-full flex flex-col items-center justify-center text-dungeon-text py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-dungeon-accent mb-2"></div>
           <div>${message}</div>
         </div>
       `;
     }
 
     function showError(message) {
-      const container = document.getElementById('tasks');
-      container.innerHTML = `
-        <div class="empty-state text-red-400">
-          <i class="fas fa-exclamation-triangle mb-2 text-2xl"></i>
+      document.getElementById('tasks').innerHTML = `
+        <div class="empty-state h-full flex flex-col items-center justify-center text-red-400 py-8">
+          <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
           <div>${message}</div>
         </div>
       `;
@@ -347,7 +342,7 @@
     async function handleAuthClick() {
       const authBtn = document.getElementById('authorize_button');
       const originalContent = authBtn.innerHTML;
-      authBtn.innerHTML = '<span class="loading-spinner mr-2"></span> Signing In';
+      authBtn.innerHTML = '<span class="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block mr-1"></span> Signing In';
       authBtn.disabled = true;
       
       tokenClient.callback = async (resp) => {
@@ -366,7 +361,7 @@
         document.getElementById('new-task').disabled = false;
         document.getElementById('add-task').disabled = false;
         
-        showLoading(document.getElementById('tasks'), 'Loading your quests...');
+        showLoading('Loading your quests...');
         await loadTaskLists();
       };
       
@@ -376,7 +371,7 @@
     function handleSignoutClick() {
       const signoutBtn = document.getElementById('signout_button');
       const originalContent = signoutBtn.innerHTML;
-      signoutBtn.innerHTML = '<span class="loading-spinner mr-2"></span> Signing Out';
+      signoutBtn.innerHTML = '<span class="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block mr-1"></span> Signing Out';
       signoutBtn.disabled = true;
       
       const token = gapi.client.getToken();
@@ -395,19 +390,21 @@
         document.getElementById('add-task').disabled = true;
         
         document.getElementById('tasks').innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-scroll mb-2 text-2xl"></i>
+          <div class="empty-state h-full flex flex-col items-center justify-center text-dungeon-text opacity-70 py-8">
+            <i class="fas fa-scroll text-3xl mb-2"></i>
             <div>Sign in to view your quests</div>
           </div>
         `;
         document.getElementById('tasklists').innerHTML = '<option value="">Sign in to load tasks</option>';
         allTasks = [];
+        completedTasks = [];
+        updateCompletedTasksUI();
       }, 500);
     }
 
     async function loadTaskLists() {
       try {
-        showLoading(document.getElementById('tasks'), 'Loading your quest lists...');
+        showLoading('Loading your quest lists...');
         const res = await gapi.client.tasks.tasklists.list();
         const lists = res.result.items || [];
         const select = document.getElementById('tasklists');
@@ -416,8 +413,8 @@
         if (lists.length === 0) {
           select.innerHTML = '<option value="">No task lists found</option>';
           document.getElementById('tasks').innerHTML = `
-            <div class="empty-state">
-              <i class="fas fa-folder-open mb-2 text-2xl"></i>
+            <div class="empty-state h-full flex flex-col items-center justify-center text-dungeon-text opacity-70 py-8">
+              <i class="fas fa-folder-open text-3xl mb-2"></i>
               <div>No quest lists found</div>
             </div>
           `;
@@ -446,7 +443,7 @@
         currentTaskListId = document.getElementById('tasklists').value;
         if (!currentTaskListId) return;
         
-        showLoading(document.getElementById('tasks'), 'Loading your quests...');
+        showLoading('Loading your quests...');
         const res = await gapi.client.tasks.tasks.list({ 
           tasklist: currentTaskListId,
           showCompleted: true,
@@ -463,73 +460,141 @@
 
     function renderTasks() {
       const container = document.getElementById('tasks');
+      const completedContainer = document.getElementById('completed-tasks-content');
       
-      if (allTasks.length === 0) {
+      // Separate completed and active tasks
+      completedTasks = allTasks.filter(task => task.status === 'completed');
+      const activeTasks = allTasks.filter(task => task.status !== 'completed');
+
+      if (activeTasks.length === 0 && completedTasks.length === 0) {
         container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-tasks mb-2 text-2xl"></i>
+          <div class="empty-state h-full flex flex-col items-center justify-center text-dungeon-text opacity-70 py-8">
+            <i class="fas fa-tasks text-3xl mb-2"></i>
             <div>No quests in this list</div>
           </div>
         `;
+        document.getElementById('completed-tasks-container').classList.add('hidden');
         return;
       }
 
-      // Sort tasks: pending first, then by due date
-      allTasks.sort((a, b) => {
-        if (a.status !== b.status) {
-          return a.status === 'completed' ? 1 : -1;
-        }
-        if (a.due && b.due) {
-          return new Date(a.due) - new Date(b.due);
-        }
-        return 0;
-      });
-
+      // Render active tasks
       container.innerHTML = '';
-      allTasks.forEach(task => {
-        const taskElement = document.createElement('div');
-        taskElement.className = 'task-item';
-        
-        const taskContent = document.createElement('div');
-        taskContent.className = 'task-content';
-        
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.className = 'task-checkbox';
-        checkbox.checked = task.status === 'completed';
-        checkbox.addEventListener('change', () => {
-          toggleTaskStatus(task.id, task.status === 'completed' ? 'needsAction' : 'completed');
+      if (activeTasks.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state py-8 text-center text-dungeon-text opacity-70">
+            <i class="fas fa-check-circle text-xl mb-1"></i>
+            <div>All quests completed!</div>
+          </div>
+        `;
+      } else {
+        activeTasks.forEach(task => {
+          const taskElement = createTaskElement(task);
+          container.appendChild(taskElement);
         });
+      }
+
+      // Update completed tasks UI
+      updateCompletedTasksUI();
+    }
+
+    function updateCompletedTasksUI() {
+      const completedContainer = document.getElementById('completed-tasks-content');
+      const completedHeader = document.getElementById('completed-tasks-container');
+      
+      if (completedTasks.length > 0) {
+        completedHeader.classList.remove('hidden');
+        document.getElementById('completed-count').textContent = completedTasks.length;
         
-        const textSpan = document.createElement('span');
-        textSpan.className = 'task-text' + (task.status === 'completed' ? ' completed' : '');
-        textSpan.textContent = task.title;
-        
-        taskContent.appendChild(checkbox);
-        taskContent.appendChild(textSpan);
-        
-        if (task.due) {
-          const dueDate = new Date(task.due);
-          const dueSpan = document.createElement('span');
-          dueSpan.className = 'task-due';
-          dueSpan.textContent = dueDate.toLocaleDateString();
-          taskContent.appendChild(dueSpan);
+        // Sort completed tasks by completion date (newest first)
+        completedTasks.sort((a, b) => {
+          if (a.completed && b.completed) {
+            return new Date(b.completed) - new Date(a.completed);
+          }
+          return 0;
+        });
+
+        // Render completed tasks
+        completedContainer.innerHTML = '';
+        completedTasks.forEach(task => {
+          const taskElement = createTaskElement(task);
+          completedContainer.appendChild(taskElement);
+        });
+      } else {
+        completedHeader.classList.add('hidden');
+      }
+    }
+
+    function createTaskElement(task) {
+      const taskElement = document.createElement('div');
+      taskElement.className = `task-item dungeon-border bg-dungeon-light flex items-center justify-between transition ${task.status === 'completed' ? 'completed' : ''}`;
+      
+      const taskContent = document.createElement('div');
+      taskContent.className = 'flex items-center w-full p-4';
+      
+      const checkbox = document.createElement('button');
+      checkbox.className = `complete-btn w-6 h-6 rounded-full border-2 border-dungeon-text flex items-center justify-center mr-3 ${task.status === 'completed' ? 'completed' : ''}`;
+      checkbox.innerHTML = task.status === 'completed' ? '<i class="fas fa-check text-white text-xs"></i>' : '';
+      checkbox.addEventListener('click', async () => {
+        // Immediately update the UI
+        if (task.status !== 'completed') {
+          checkbox.innerHTML = '<i class="fas fa-check text-white text-xs"></i>';
+          checkbox.classList.add('completed');
+          
+          const textSpan = taskContent.querySelector('.task-text');
+          if (textSpan) {
+            textSpan.classList.add('completed');
+          }
+          
+          // Then update the server
+          await toggleTaskStatus(task.id, 'completed');
+        } else {
+          checkbox.innerHTML = '';
+          checkbox.classList.remove('completed');
+          
+          const textSpan = taskContent.querySelector('.task-text');
+          if (textSpan) {
+            textSpan.classList.remove('completed');
+          }
+          
+          // Then update the server
+          await toggleTaskStatus(task.id, 'needsAction');
         }
-        
-        const actionsDiv = document.createElement('div');
-        actionsDiv.className = 'task-actions';
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'task-delete';
-        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-        deleteBtn.title = 'Delete quest';
-        deleteBtn.addEventListener('click', () => deleteTask(task.id));
-        
-        actionsDiv.appendChild(deleteBtn);
-        taskElement.appendChild(taskContent);
-        taskElement.appendChild(actionsDiv);
-        container.appendChild(taskElement);
       });
+      
+      const textContainer = document.createElement('div');
+      textContainer.className = 'task-text-container flex-grow';
+      
+      const textSpan = document.createElement('span');
+      textSpan.className = `task-text text-dungeon-text ${task.status === 'completed' ? 'completed' : ''}`;
+      textSpan.textContent = task.title;
+      
+      textContainer.appendChild(textSpan);
+      
+      if (task.due) {
+        const dueDate = new Date(task.due);
+        const dueDiv = document.createElement('div');
+        dueDiv.className = 'mt-1';
+        
+        const dueSpan = document.createElement('span');
+        dueSpan.className = 'text-xs text-dungeon-text opacity-70';
+        dueSpan.innerHTML = `<i class="fas fa-calendar-day mr-1"></i> ${dueDate.toLocaleDateString()}`;
+        
+        dueDiv.appendChild(dueSpan);
+        textContainer.appendChild(dueDiv);
+      }
+      
+      taskContent.appendChild(checkbox);
+      taskContent.appendChild(textContainer);
+      
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-btn text-dungeon-text opacity-50 hover:opacity-100 hover:text-dungeon-danger transition';
+      deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+      deleteBtn.addEventListener('click', () => deleteTask(task.id));
+      
+      taskElement.appendChild(taskContent);
+      taskElement.appendChild(deleteBtn);
+      
+      return taskElement;
     }
 
     async function addTask() {
@@ -539,7 +604,7 @@
 
       const addBtn = document.getElementById('add-task');
       const originalContent = addBtn.innerHTML;
-      addBtn.innerHTML = '<span class="loading-spinner"></span>';
+      addBtn.innerHTML = '<span class="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block mr-1"></span> Adding';
       addBtn.disabled = true;
       input.disabled = true;
 
@@ -566,11 +631,6 @@
     }
 
     async function toggleTaskStatus(taskId, newStatus) {
-      const taskItem = document.querySelector(`.task-checkbox[data-task-id="${taskId}"]`);
-      if (taskItem) {
-        taskItem.disabled = true;
-      }
-
       try {
         await gapi.client.tasks.tasks.patch({
           tasklist: currentTaskListId,
@@ -587,9 +647,9 @@
     async function deleteTask(taskId) {
       if (!confirm('Are you sure you want to delete this quest?')) return;
       
-      const deleteBtn = document.querySelector(`.task-delete[data-task-id="${taskId}"]`);
+      const deleteBtn = document.querySelector(`.delete-btn[data-task-id="${taskId}"]`);
       if (deleteBtn) {
-        deleteBtn.innerHTML = '<span class="loading-spinner"></span>';
+        deleteBtn.innerHTML = '<span class="animate-spin rounded-full h-4 w-4 border-b-2 border-current inline-block"></span>';
         deleteBtn.disabled = true;
       }
 
@@ -605,7 +665,6 @@
       }
     }
 
-    // Initialize the widget when the page loads
     window.addEventListener('load', initTasksWidget);
   </script>
 </body>
