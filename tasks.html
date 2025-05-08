@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shadow Monarch's Quests</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --dungeon-text: #e2e8f0;
+      --dungeon-accent: #6366f1;
+      --dungeon-light: #2a2a4a;
+      --dungeon-mid: #1a1a2e;
+      --dungeon-dark: #0f0f1a;
+      --dungeon-danger: #dc2626;
+      --dungeon-border: rgba(79, 70, 229, 0.3);
+    }
+    
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background: var(--dungeon-dark);
+      color: var(--dungeon-text);
+    }
+    
+    .dungeon-border {
+      border: 1px solid var(--dungeon-border);
+      box-shadow: 0 0 10px rgba(79, 70, 229, 0.2);
+    }
+    
+    .bg-dungeon-mid {
+      background-color: var(--dungeon-mid);
+    }
+    
+    .bg-dungeon-light {
+      background-color: var(--dungeon-light);
+    }
+    
+    .text-dungeon-text {
+      color: var(--dungeon-text);
+    }
+    
+    .text-dungeon-accent {
+      color: var(--dungeon-accent);
+    }
+    
+    .bg-dungeon-accent {
+      background-color: var(--dungeon-accent);
+    }
+    
+    .border-dungeon-light {
+      border-color: var(--dungeon-light);
+    }
+    
+    .complete-btn {
+      transition: all 0.2s;
+    }
+    
+    .complete-btn:hover {
+      border-color: var(--dungeon-accent);
+    }
+    
+    .complete-btn.completed {
+      background-color: var(--dungeon-accent);
+      border-color: var(--dungeon-accent);
+    }
+    
+    /* Strike-through animation */
+    .task-text-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .task-text {
+      position: relative;
+    }
+
+    .task-text.completed {
+      animation: strike 0.5s ease-out forwards;
+    }
+
+    @keyframes strike {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+        text-decoration: line-through;
+        text-decoration-thickness: 2px;
+      }
+      100% {
+        opacity: 0.7;
+        text-decoration: line-through;
+        text-decoration-thickness: 2px;
+      }
+    }
+
+    .task-item.completed {
+      transition: opacity 0.3s ease;
+    }
+    
+    #tasks-container {
+      height: calc(100vh - 220px);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--dungeon-accent) var(--dungeon-light);
+    }
+    
+    #tasks-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    #tasks-container::-webkit-scrollbar-track {
+      background: var(--dungeon-light);
+    }
+    
+    #tasks-container::-webkit-scrollbar-thumb {
+      background: var(--dungeon-accent);
+      border-radius: 3px;
+    }
+    
+    .shadow-monarch-container {
+      height: 100vh;
+      width: 100vw;
+      padding: 0;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .shadow-monarch-content {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+    }
+    
+    /* Completed tasks dropdown styles */
+    .completed-tasks-dropdown {
+      border-top: 1px solid var(--dungeon-border);
+      margin: 0 -1rem;
+      padding: 0 1rem;
+    }
+    
+    .completed-tasks-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      cursor: pointer;
+      color: var(--dungeon-text);
+      opacity: 0.7;
+      transition: all 0.2s;
+    }
+    
+    .completed-tasks-header:hover {
+      opacity: 1;
+    }
+    
+    .completed-tasks-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      margin: 0 -1rem;
+      padding: 0 1rem;
+    }
+    
+    .completed-tasks-content.show {
+      max-height: 1000px;
+    }
+    
+    .completed-count {
+      background-color: var(--dungeon-light);
+      border-radius: 9999px;
+      padding: 0.125rem 0.5rem;
+      font-size: 0.75rem;
+    }
+    
+    .rotate-180 {
+      transform: rotate(180deg);
+    }
+    
+    .task-item {
+      margin-left: 0;
+      margin-right: 0;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+    }
+    
+    .empty-state {
+      margin: 0 -1rem;
+      padding: 0 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="shadow-monarch-container">
+    <div class="shadow-monarch-content">
+      <div class="dungeon-border rounded-lg bg-dungeon-mid flex flex-col" style="height: 100%;">
+        <div class="flex justify-between items-center p-6 pb-4">
+          <h2 class="text-xl font-bold text-dungeon-text flex items-center">
+            <i class="fas fa-crown text-dungeon-accent mr-2"></i> SHADOW MONARCH'S QUESTS
+          </h2>
+          <div class="flex gap-2">
+            <button id="authorize_button" class="text-sm bg-dungeon-accent hover:bg-opacity-90 text-white font-bold px-3 py-1 rounded transition flex items-center">
+              <i class="fas fa-sign-in-alt mr-1"></i> Sign In
+            </button>
+            <button id="signout_button" class="text-sm bg-dungeon-accent hover:bg-opacity-90 text-white font-bold px-3 py-1 rounded transition flex items-center" style="display: none;">
+              <i class="fas fa-sign-out-alt mr-1"></i> Sign Out
+            </button>
+          </div>
+        </div>
+
+        <div class="px-6 pb-4">
+          <select id="tasklists" class="w-full bg-dungeon-light border border-dungeon-light text-dungeon-text rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-dungeon-accent" disabled>
+            <option value="">Sign in to load tasks</option>
+          </select>
+        </div>
+
+        <div class="px-6 pb-4">
+          <div class="flex flex-wrap">
+            <input type="text" id="new-task" placeholder="New quest..." class="flex-grow bg-dungeon-light border border-dungeon-light text-dungeon-text px-4 py-2 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-dungeon-accent" disabled>
+            <button id="add-task" class="bg-dungeon-accent hover:bg-opacity-90 text-white font-bold px-4 py-2 rounded-r-lg transition" disabled>
+              <i class="fas fa-plus"></i> Add
+            </button>
+          </div>
+        </div>
+
+        <div id="tasks-container" class="flex-grow overflow-y-auto">
+          <div id="tasks" class="space-y-0">
+            <div class="empty-state h-full flex flex-col items-center justify-center text-dungeon-text opacity-70 py-8">
+              <i class="fas fa-scroll text-3xl mb-2"></i>
+              <div>Sign in to view your quests</div>
+            </div>
+          </div>
+
+          <!-- Completed Tasks Dropdown (hidden by default) -->
+          <div id="completed-tasks-container" class="completed-tasks-dropdown hidden">
+            <div id="completed-tasks-header" class="completed-tasks-header">
+              <div class="flex items-center">
+                <i class="fas fa-chevron-down mr-2 transition-transform duration-200"></i>
+                <span>Completed</span>
+                <span id="completed-count" class="completed-count ml-2">0</span>
+              </div>
+            </div>
+            <div id="completed-tasks-content" class="completed-tasks-content">
+              <!-- Completed tasks will be inserted here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script>
+    const CLIENT_ID = '1048202385042-s67i9hr9b6ga6rkjfpqfmcsj1khgn5i5.apps.googleusercontent.com';
+    const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/tasks/v1/rest';
+    const SCOPES = 'https://www.googleapis.com/auth/tasks';
+
+    let tokenClient, gapiInited = false, gisInited = false;
+    let currentTaskListId = null;
+    let allTasks = [];
+    let completedTasks = [];
+
+    function initTasksWidget() {
+      gapi.load('client', async () => {
+        try {
+          await gapi.client.init({
+            apiKey: '',
+            discoveryDocs: [DISCOVERY_DOC],
+          });
+          gapiInited = true;
+          maybeEnableButtons();
+        } catch (error) {
+          console.error('Error initializing Google API client:', error);
+          showError('Failed to initialize Google API');
+        }
+      });
+
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: '',
+      });
+      gisInited = true;
+      maybeEnableButtons();
+
+      document.getElementById('authorize_button').addEventListener('click', handleAuthClick);
+      document.getElementById('signout_button').addEventListener('click', handleSignoutClick);
+      document.getElementById('tasklists').addEventListener('change', loadTasks);
+      document.getElementById('add-task').addEventListener('click', addTask);
+      document.getElementById('new-task').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addTask();
+      });
+
+      // Completed tasks dropdown toggle
+      document.getElementById('completed-tasks-header').addEventListener('click', toggleCompletedTasks);
+    }
+
+    function toggleCompletedTasks() {
+      const content = document.getElementById('completed-tasks-content');
+      const icon = document.querySelector('#completed-tasks-header i');
+      content.classList.toggle('show');
+      icon.classList.toggle('rotate-180');
+    }
+
+    function maybeEnableButtons() {
+      if (gapiInited && gisInited) {
+        document.getElementById('authorize_button').disabled = false;
+      }
+    }
+
+    function showLoading(message = 'Loading...') {
+      document.getElementById('tasks').innerHTML = `
+        <div class="empty-state h-full flex flex-col items-center justify-center text-dungeon-text py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-dungeon-accent mb-2"></div>
+          <div>${message}</div>
+        </div>
+      `;
+    }
+
+    function showError(message) {
+      document.getElementById('tasks').innerHTML = `
+        <div class="empty-state h-full flex flex-col items-center justify-center text-red-400 py-8">
+          <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+          <div>${message}</div>
+        </div>
+      `;
+    }
+
+    async function handleAuthClick() {
+      const authBtn = document.getElementById('authorize_button');
+      const originalContent = authBtn.innerHTML;
+      authBtn.innerHTML = '<span class="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block mr-1"></span> Signing In';
+      authBtn.disabled = true;
+      
+      tokenClient.callback = async (resp) => {
+        authBtn.innerHTML = originalContent;
+        authBtn.disabled = false;
+        
+        if (resp.error) {
+          console.error(resp);
+          showError('Authentication failed');
+          return;
+        }
+        
+        document.getElementById('authorize_button').style.display = 'none';
+        document.getElementById('signout_button').style.display = 'flex';
+        document.getElementById('tasklists').disabled = false;
+        document.getElementById('new-task').disabled = false;
+        document.getElementById('add-task').disabled = false;
+        
+        showLoading('Loading your quests...');
+        await loadTaskLists();
+      };
+      
+      tokenClient.requestAccessToken({ prompt: 'consent' });
+    }
+
+    function handleSignoutClick() {
+      const signoutBtn = document.getElementById('signout_button');
+      const originalContent = signoutBtn.innerHTML;
+      signoutBtn.innerHTML = '<span class="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block mr-1"></span> Signing Out';
+      signoutBtn.disabled = true;
+      
+      const token = gapi.client.getToken();
+      if (token) {
+        google.accounts.oauth2.revoke(token.access_token);
+        gapi.client.setToken('');
+      }
+      
+      setTimeout(() => {
+        document.getElementById('authorize_button').style.display = 'flex';
+        document.getElementById('signout_button').style.display = 'none';
+        document.getElementById('signout_button').innerHTML = originalContent;
+        document.getElementById('signout_button').disabled = false;
+        document.getElementById('tasklists').disabled = true;
+        document.getElementById('new-task').disabled = true;
+        document.getElementById('add-task').disabled = true;
+        
+        document.getElementById('tasks').innerHTML = `
+          <div class="empty-state h-full flex flex-col items-center justify-center text-dungeon-text opacity-70 py-8">
+            <i class="fas fa-scroll text-3xl mb-2"></i>
+            <div>Sign in to view your quests</div>
+          </div>
+        `;
+        document.getElementById('tasklists').innerHTML = '<option value="">Sign in to load tasks</option>';
+        allTasks = [];
+        completedTasks = [];
+        updateCompletedTasksUI();
+      }, 500);
+    }
+
+    async function loadTaskLists() {
+      try {
+        showLoading('Loading your quest lists...');
+        const res = await gapi.client.tasks.tasklists.list();
+        const lists = res.result.items || [];
+        const select = document.getElementById('tasklists');
+        select.innerHTML = '';
+
+        if (lists.length === 0) {
+          select.innerHTML = '<option value="">No task lists found</option>';
+          document.getElementById('tasks').innerHTML = `
+            <div class="empty-state h-full flex flex-col items-center justify-center text-dungeon-text opacity-70 py-8">
+              <i class="fas fa-folder-open text-3xl mb-2"></i>
+              <div>No quest lists found</div>
+            </div>
+          `;
+          return;
+        }
+
+        lists.forEach(list => {
+          const option = document.createElement('option');
+          option.value = list.id;
+          option.textContent = list.title;
+          select.appendChild(option);
+        });
+
+        currentTaskListId = lists[0].id;
+        select.value = currentTaskListId;
+        loadTasks();
+      } catch (error) {
+        console.error('Error loading task lists:', error);
+        document.getElementById('tasklists').innerHTML = '<option value="">Error loading lists</option>';
+        showError('Failed to load quest lists');
+      }
+    }
+
+    async function loadTasks() {
+      try {
+        currentTaskListId = document.getElementById('tasklists').value;
+        if (!currentTaskListId) return;
+        
+        showLoading('Loading your quests...');
+        const res = await gapi.client.tasks.tasks.list({ 
+          tasklist: currentTaskListId,
+          showCompleted: true,
+          showHidden: true
+        });
+        
+        allTasks = res.result.items || [];
+        renderTasks();
+      } catch (error) {
+        console.error('Error loading tasks:', error);
+        showError('Failed to load quests');
+      }
+    }
+
+    function renderTasks() {
+      const container = document.getElementById('tasks');
+      const completedContainer = document.getElementById('completed-tasks-content');
+      
+      // Separate completed and active tasks
+      completedTasks = allTasks.filter(task => task.status === 'completed');
+      const activeTasks = allTasks.filter(task => task.status !== 'completed');
+
+      if (activeTasks.length === 0 && completedTasks.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state h-full flex flex-col items-center justify-center text-dungeon-text opacity-70 py-8">
+            <i class="fas fa-tasks text-3xl mb-2"></i>
+            <div>No quests in this list</div>
+          </div>
+        `;
+        document.getElementById('completed-tasks-container').classList.add('hidden');
+        return;
+      }
+
+      // Render active tasks
+      container.innerHTML = '';
+      if (activeTasks.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state py-8 text-center text-dungeon-text opacity-70">
+            <i class="fas fa-check-circle text-xl mb-1"></i>
+            <div>All quests completed!</div>
+          </div>
+        `;
+      } else {
+        activeTasks.forEach(task => {
+          const taskElement = createTaskElement(task);
+          container.appendChild(taskElement);
+        });
+      }
+
+      // Update completed tasks UI
+      updateCompletedTasksUI();
+    }
+
+    function updateCompletedTasksUI() {
+      const completedContainer = document.getElementById('completed-tasks-content');
+      const completedHeader = document.getElementById('completed-tasks-container');
+      
+      if (completedTasks.length > 0) {
+        completedHeader.classList.remove('hidden');
+        document.getElementById('completed-count').textContent = completedTasks.length;
+        
+        // Sort completed tasks by completion date (newest first)
+        completedTasks.sort((a, b) => {
+          if (a.completed && b.completed) {
+            return new Date(b.completed) - new Date(a.completed);
+          }
+          return 0;
+        });
+
+        // Render completed tasks
+        completedContainer.innerHTML = '';
+        completedTasks.forEach(task => {
+          const taskElement = createTaskElement(task);
+          completedContainer.appendChild(taskElement);
+        });
+      } else {
+        completedHeader.classList.add('hidden');
+      }
+    }
+
+    function createTaskElement(task) {
+      const taskElement = document.createElement('div');
+      taskElement.className = `task-item dungeon-border bg-dungeon-light flex items-center justify-between transition ${task.status === 'completed' ? 'completed' : ''}`;
+      
+      const taskContent = document.createElement('div');
+      taskContent.className = 'flex items-center w-full p-4';
+      
+      const checkbox = document.createElement('button');
+      checkbox.className = `complete-btn w-6 h-6 rounded-full border-2 border-dungeon-text flex items-center justify-center mr-3 ${task.status === 'completed' ? 'completed' : ''}`;
+      checkbox.innerHTML = task.status === 'completed' ? '<i class="fas fa-check text-white text-xs"></i>' : '';
+      checkbox.addEventListener('click', async () => {
+        // Immediately update the UI
+        if (task.status !== 'completed') {
+          checkbox.innerHTML = '<i class="fas fa-check text-white text-xs"></i>';
+          checkbox.classList.add('completed');
+          
+          const textSpan = taskContent.querySelector('.task-text');
+          if (textSpan) {
+            textSpan.classList.add('completed');
+          }
+          
+          // Then update the server
+          await toggleTaskStatus(task.id, 'completed');
+        } else {
+          checkbox.innerHTML = '';
+          checkbox.classList.remove('completed');
+          
+          const textSpan = taskContent.querySelector('.task-text');
+          if (textSpan) {
+            textSpan.classList.remove('completed');
+          }
+          
+          // Then update the server
+          await toggleTaskStatus(task.id, 'needsAction');
+        }
+      });
+      
+      const textContainer = document.createElement('div');
+      textContainer.className = 'task-text-container flex-grow';
+      
+      const textSpan = document.createElement('span');
+      textSpan.className = `task-text text-dungeon-text ${task.status === 'completed' ? 'completed' : ''}`;
+      textSpan.textContent = task.title;
+      
+      textContainer.appendChild(textSpan);
+      
+      if (task.due) {
+        const dueDate = new Date(task.due);
+        const dueDiv = document.createElement('div');
+        dueDiv.className = 'mt-1';
+        
+        const dueSpan = document.createElement('span');
+        dueSpan.className = 'text-xs text-dungeon-text opacity-70';
+        dueSpan.innerHTML = `<i class="fas fa-calendar-day mr-1"></i> ${dueDate.toLocaleDateString()}`;
+        
+        dueDiv.appendChild(dueSpan);
+        textContainer.appendChild(dueDiv);
+      }
+      
+      taskContent.appendChild(checkbox);
+      taskContent.appendChild(textContainer);
+      
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-btn text-dungeon-text opacity-50 hover:opacity-100 hover:text-dungeon-danger transition';
+      deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+      deleteBtn.addEventListener('click', () => deleteTask(task.id));
+      
+      taskElement.appendChild(taskContent);
+      taskElement.appendChild(deleteBtn);
+      
+      return taskElement;
+    }
+
+    async function addTask() {
+      const input = document.getElementById('new-task');
+      const title = input.value.trim();
+      if (!title) return;
+
+      const addBtn = document.getElementById('add-task');
+      const originalContent = addBtn.innerHTML;
+      addBtn.innerHTML = '<span class="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block mr-1"></span> Adding';
+      addBtn.disabled = true;
+      input.disabled = true;
+
+      try {
+        await gapi.client.tasks.tasks.insert({
+          tasklist: currentTaskListId,
+          resource: { 
+            title: title,
+            notes: 'Added via Shadow Monarch'
+          }
+        });
+
+        input.value = '';
+        await loadTasks();
+      } catch (error) {
+        console.error('Error adding task:', error);
+        showError('Failed to add quest');
+      } finally {
+        addBtn.innerHTML = originalContent;
+        addBtn.disabled = false;
+        input.disabled = false;
+        input.focus();
+      }
+    }
+
+    async function toggleTaskStatus(taskId, newStatus) {
+      try {
+        await gapi.client.tasks.tasks.patch({
+          tasklist: currentTaskListId,
+          task: taskId,
+          resource: { status: newStatus }
+        });
+        await loadTasks();
+      } catch (error) {
+        console.error('Error toggling task status:', error);
+        showError('Failed to update quest status');
+      }
+    }
+
+    async function deleteTask(taskId) {
+      if (!confirm('Are you sure you want to delete this quest?')) return;
+      
+      const deleteBtn = document.querySelector(`.delete-btn[data-task-id="${taskId}"]`);
+      if (deleteBtn) {
+        deleteBtn.innerHTML = '<span class="animate-spin rounded-full h-4 w-4 border-b-2 border-current inline-block"></span>';
+        deleteBtn.disabled = true;
+      }
+
+      try {
+        await gapi.client.tasks.tasks.delete({
+          tasklist: currentTaskListId,
+          task: taskId
+        });
+        await loadTasks();
+      } catch (error) {
+        console.error('Error deleting task:', error);
+        showError('Failed to delete quest');
+      }
+    }
+
+    window.addEventListener('load', initTasksWidget);
+  </script>
+</body>
+</html>
