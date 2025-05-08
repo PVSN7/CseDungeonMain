@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS Student Dungeon</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dungeon: {
+                            dark: '#0a0a12',
+                            mid: '#1a1a2e',
+                            light: '#2a2a4a',
+                            accent: '#4f46e5',
+                            danger: '#dc2626',
+                            success: '#10b981',
+                            warning: '#f59e0b',
+                            text: '#e2e8f0',
+                        },
+                        mana: {
+                            blue: '#3b82f6',
+                            dark: '#1e40af'
+                        },
+                        category: {
+                            coding: '#3b82f6',
+                            exercise: '#10b981',
+                            study: '#8b5cf6',
+                            project: '#f59e0b',
+                            exam: '#ec4899'
+                        },
+                        tasktype: {
+                            daily: '#3b82f6',
+                            onetime: '#10b981',
+                            dated: '#8b5cf6'
+                        }
+                    },
+                    fontFamily: {
+                        'solo': ['"Rajdhani"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #0a0a12;
+            color: #e2e8f0;
+            background-image: radial-gradient(circle at 10% 20%, rgba(31, 41, 55, 0.1) 0%, rgba(31, 41, 55, 0) 20%),
+                radial-gradient(circle at 90% 80%, rgba(79, 70, 229, 0.1) 0%, rgba(79, 70, 229, 0) 20%);
+        }
+
+        .dungeon-border {
+            border: 1px solid rgba(79, 70, 229, 0.3);
+            box-shadow: 0 0 10px rgba(79, 70, 229, 0.2);
+        }
+
+        .mana-bar {
+            background: linear-gradient(90deg, #3b82f6 0%, #1e40af 100%);
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
+        }
+
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(79, 70, 229, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 4px;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .coding-badge {
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .exercise-badge {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .study-badge {
+            background-color: rgba(139, 92, 246, 0.2);
+            color: #8b5cf6;
+        }
+
+        .project-badge {
+            background-color: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .exam-badge {
+            background-color: rgba(236, 72, 153, 0.2);
+            color: #ec4899;
+        }
+
+        .tasktype-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-left: 0.5rem;
+        }
+
+        .daily-badge {
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .onetime-badge {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .dated-badge {
+            background-color: rgba(139, 92, 246, 0.2);
+            color: #8b5cf6;
+        }
+
+        .tab-active {
+            border-bottom: 2px solid #4f46e5;
+            color: #4f46e5;
+        }
+
+        .date-input {
+            background-color: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            color: #e2e8f0;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            margin-left: 0.5rem;
+        }
+
+        .task-type-selector {
+            display: flex;
+            margin-bottom: 0.5rem;
+        }
+
+        .task-type-btn {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            margin-right: 0.5rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .task-type-btn.active {
+            background-color: #4f46e5;
+            color: white;
+        }
+
+        .task-type-btn.inactive {
+            background-color: #2a2a4a;
+            color: #e2e8f0;
+        }
+
+        .website-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            object-fit: cover;
+            margin-bottom: 8px;
+        }
+
+        .add-website-form {
+            display: none;
+            padding: 1rem;
+            background-color: #1a1a2e;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .add-website-form input {
+            background-color: #2a2a4a;
+            border: 1px solid #4f46e5;
+            color: #e2e8f0;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+            width: 100%;
+        }
+
+        .add-website-form button {
+            background-color: #4f46e5;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+
+        .add-website-form button.cancel {
+            background-color: #2a2a4a;
+        }
+
+        .level-up-animation {
+            animation: levelUp 1.5s ease-out;
+        }
+
+        @keyframes levelUp {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.5);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #4f46e5;
+            opacity: 0;
+            animation: confetti 5s ease-in-out;
+            z-index: 1000;
+        }
+
+        @keyframes confetti {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(1000px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Iframe styling */
+        .tasks-iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+            border-radius: 8px;
+            background: #1a1a2e;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Quick links styles */
+        .quick-links-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .quick-link-box {
+            background-color: #1a1a2e;
+            border: 1px solid rgba(79, 70, 229, 0.3);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            height: 100%;
+        }
+
+        .quick-link-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
+            background-color: rgba(79, 70, 229, 0.1);
+        }
+
+        .quick-link-icon {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 0.75rem;
+            border-radius: 4px;
+            object-fit: contain;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .lg\:col-span-2 {
+                grid-column: span 1;
+            }
+
+            .quick-links-container {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .quick-link-box {
+                padding: 0.75rem;
+            }
+
+            .quick-link-icon {
+                width: 28px;
+                height: 28px;
+            }
+
+            .tasks-iframe {
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .quick-links-container {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+
+            .quick-link-box {
+                padding: 0.5rem;
+            }
+
+            .quick-link-icon {
+                width: 24px;
+                height: 24px;
+            }
+
+            .tasks-iframe {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header with Player Stats -->
+        <header class="mb-8 dungeon-border rounded-lg p-6 bg-dungeon-mid relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-r from-dungeon-dark to-dungeon-mid opacity-50"></div>
+            <div class="relative z-10 flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <div class="w-16 h-16 rounded-full bg-dungeon-light flex items-center justify-center mr-4 pulse">
+                        <i class="fas fa-laptop-code text-dungeon-accent text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-dungeon-text">CS Student</h1>
+                        <div class="flex items-center">
+                            <span class="text-dungeon-accent mr-2">Lv. <span id="player-level">5</span></span>
+                            <div class="w-32 h-2 bg-dungeon-dark rounded-full">
+                                <div id="exp-bar" class="mana-bar rounded-full" style="width: 45%"></div>
+                            </div>
+                            <span class="ml-2 text-sm text-dungeon-text"><span id="current-exp">450</span>/<span
+                                    id="max-exp">1000</span> EXP</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                        <div class="text-xs text-dungeon-text opacity-80">ALGO</div>
+                        <div class="text-xl font-bold text-dungeon-accent">87</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-dungeon-text opacity-80">PHYS</div>
+                        <div class="text-xl font-bold text-dungeon-accent">92</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-dungeon-text opacity-80">GRADES</div>
+                        <div class="text-xl font-bold text-dungeon-accent">3.8</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Daily Quests -->
+            <div class="lg:col-span-2">
+                <!-- Google Tasks Iframe Integration -->
+                <iframe src="tasks.html" class="tasks-iframe dungeon-border"></iframe>
+
+                <!-- Quick Links -->
+                <div class="dungeon-border rounded-lg p-6 bg-dungeon-mid">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold text-dungeon-text flex items-center">
+                            <i class="fas fa-link text-dungeon-accent mr-2"></i> Quick Links
+                        </h2>
+                        <button id="add-website-btn"
+                            class="text-xs bg-dungeon-accent hover:bg-opacity-90 text-dungeon-text font-bold px-3 py-1 rounded-lg transition">
+                            <i class="fas fa-plus mr-1"></i> Add Website
+                        </button>
+                    </div>
+
+                    <div id="add-website-form" class="add-website-form">
+                        <input type="text" id="website-name" placeholder="Website Name (e.g. GitHub)">
+                        <input type="url" id="website-url" placeholder="Website URL (e.g. https://github.com)">
+                        <input type="text" id="website-icon" placeholder="Icon URL (optional)">
+                        <div class="flex">
+                            <button id="save-website" class="bg-dungeon-accent hover:bg-opacity-90">Save</button>
+                            <button id="cancel-website" class="cancel hover:bg-opacity-90">Cancel</button>
+                        </div>
+                    </div>
+
+                    <div id="quick-links" class="quick-links-container">
+                        <!-- Default websites -->
+                        <div class="quick-link-box" onclick="window.open('https://github.com', '_blank')">
+                            <img src="https://github.githubassets.com/favicons/favicon.png" class="quick-link-icon">
+                            <div class="font-bold text-dungeon-text">GitHub</div>
+                            <div class="text-xs text-dungeon-text opacity-80">Code hosting</div>
+                        </div>
+                        <div class="quick-link-box" onclick="window.open('https://leetcode.com', '_blank')">
+                            <img src="https://leetcode.com/favicon.ico" class="quick-link-icon">
+                            <div class="font-bold text-dungeon-text">LeetCode</div>
+                            <div class="text-xs text-dungeon-text opacity-80">Coding practice</div>
+                        </div>
+                        <div class="quick-link-box" onclick="window.open('https://stackoverflow.com', '_blank')">
+                            <img src="https://stackoverflow.com/favicon.ico" class="quick-link-icon">
+                            <div class="font-bold text-dungeon-text">Stack Overflow</div>
+                            <div class="text-xs text-dungeon-text opacity-80">Q&A</div>
+                        </div>
+                        <div class="quick-link-box" onclick="window.open('https://www.youtube.com', '_blank')">
+                            <img src="https://www.youtube.com/favicon.ico" class="quick-link-icon">
+                            <div class="font-bold text-dungeon-text">YouTube</div>
+                            <div class="text-xs text-dungeon-text opacity-80">Tutorials</div>
+                        </div>
+                        <!-- User added websites will appear here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dungeon Progress -->
+            <div>
+                <div class="dungeon-border rounded-lg p-6 bg-dungeon-mid mb-6">
+                    <h2 class="text-xl font-bold text-dungeon-text flex items-center mb-6">
+                        <i class="fas fa-dungeon text-dungeon-accent mr-2"></i> Student Progress
+                    </h2>
+
+                    <div class="mb-6">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-dungeon-text">Daily Completion</span>
+                            <span class="text-dungeon-accent font-bold" id="daily-percentage">0%</span>
+                        </div>
+                        <div class="w-full h-3 bg-dungeon-dark rounded-full">
+                            <div id="progress-bar"
+                                class="h-3 rounded-full bg-gradient-to-r from-dungeon-accent to-mana-blue"
+                                style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-dungeon-light flex items-center justify-center mr-3">
+                                <i class="fas fa-fire text-dungeon-accent"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="text-dungeon-text font-medium">Current Streak</div>
+                                <div class="text-xs text-dungeon-text opacity-80">Consecutive days completing tasks
+                                </div>
+                            </div>
+                            <div class="text-xl font-bold text-dungeon-accent" id="streak-count">0</div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-dungeon-light flex items-center justify-center mr-3">
+                                <i class="fas fa-trophy text-dungeon-accent"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="text-dungeon-text font-medium">Total Tasks</div>
+                                <div class="text-xs text-dungeon-text opacity-80">All-time completed tasks</div>
+                            </div>
+                            <div class="text-xl font-bold text-dungeon-accent" id="total-quests">0</div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-dungeon-light flex items-center justify-center mr-3">
+                                <i class="fas fa-gem text-dungeon-accent"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="text-dungeon-text font-medium">Next Reward</div>
+                                <div class="text-xs text-dungeon-text opacity-80">At <span
+                                        id="next-reward-exp">200</span> EXP</div>
+                            </div>
+                            <div class="text-xl font-bold text-dungeon-accent">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Breakdown -->
+                <div class="dungeon-border rounded-lg p-6 bg-dungeon-mid mb-6">
+                    <h2 class="text-xl font-bold text-dungeon-text flex items-center mb-6">
+                        <i class="fas fa-chart-pie text-dungeon-accent mr-2"></i> Category Breakdown
+                    </h2>
+
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="bg-dungeon-light rounded-lg p-3 text-center">
+                            <div class="text-sm text-dungeon-text opacity-80 mb-1">Coding</div>
+                            <div class="text-xl font-bold text-category-coding" id="coding-count">0</div>
+                        </div>
+                        <div class="bg-dungeon-light rounded-lg p-3 text-center">
+                            <div class="text-sm text-dungeon-text opacity-80 mb-1">Exercise</div>
+                            <div class="text-xl font-bold text-category-exercise" id="exercise-count">0</div>
+                        </div>
+                        <div class="bg-dungeon-light rounded-lg p-3 text-center">
+                            <div class="text-sm text-dungeon-text opacity-80 mb-1">Study</div>
+                            <div class="text-xl font-bold text-category-study" id="study-count">0</div>
+                        </div>
+                        <div class="bg-dungeon-light rounded-lg p-3 text-center">
+                            <div class="text-sm text-dungeon-text opacity-80 mb-1">Projects</div>
+                            <div class="text-xl font-bold text-category-project" id="project-count">0</div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="inline-block bg-dungeon-light rounded-lg p-3">
+                            <div class="text-sm text-dungeon-text opacity-80 mb-1">Exams</div>
+                            <div class="text-xl font-bold text-category-exam" id="exam-count">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Messages -->
+                <div class="dungeon-border rounded-lg p-6 bg-dungeon-mid">
+                    <h2 class="text-xl font-bold text-dungeon-text flex items-center mb-6">
+                        <i class="fas fa-terminal text-dungeon-accent mr-2"></i> System Messages
+                    </h2>
+
+                    <div id="system-messages" class="space-y-3 max-h-64 overflow-y-auto">
+                        <div
+                            class="bg-dungeon-dark rounded p-3 text-sm text-dungeon-text border-l-4 border-dungeon-accent">
+                            <div class="font-bold text-dungeon-accent">SYSTEM:</div>
+                            <div>Welcome to your CS Student Dungeon. Complete tasks to level up your skills!</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <button id="clear-messages"
+                            class="text-xs text-dungeon-text opacity-70 hover:opacity-100 transition">
+                            <i class="fas fa-trash mr-1"></i> Clear Messages
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Crystals -->
+        <div class="fixed bottom-0 left-0 w-full flex justify-between px-8 pointer-events-none z-0 opacity-20">
+            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-dungeon-accent to-transparent floating"
+                style="animation-delay: 0s;"></div>
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-mana-blue to-transparent floating"
+                style="animation-delay: 1s;"></div>
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-dungeon-accent to-transparent floating"
+                style="animation-delay: 0.5s;"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Player stats
+            const streak = parseInt(localStorage.getItem('streak')) || 0;
+            const totalQuests = parseInt(localStorage.getItem('totalQuests')) || 0;
+            const playerLevel = parseInt(localStorage.getItem('playerLevel')) || 1;
+            const currentExp = parseInt(localStorage.getItem('currentExp')) || 0;
+            const maxExp = calculateMaxExp(playerLevel);
+            const consecutiveDays = parseInt(localStorage.getItem('consecutiveDays')) || 0;
+            const websites = JSON.parse(localStorage.getItem('csStudentWebsites')) || [];
+
+            // Initialize UI
+            updateStreak(streak);
+            updateTotalQuests(totalQuests);
+            updatePlayerStats(playerLevel, currentExp, maxExp);
+            updateProgress();
+            updateWebsites();
+
+            // Clear messages
+            document.getElementById('clear-messages').addEventListener('click', function () {
+                document.getElementById('system-messages').innerHTML = `
+                    <div class="bg-dungeon-dark rounded p-3 text-sm text-dungeon-text border-l-4 border-dungeon-accent">
+                        <div class="font-bold text-dungeon-accent">SYSTEM:</div>
+                        <div>Message log cleared.</div>
+                    </div>
+                `;
+            });
+
+            // Website management
+            document.getElementById('add-website-btn').addEventListener('click', function (e) {
+                e.preventDefault();
+                document.getElementById('add-website-form').style.display = 'block';
+            });
+
+            document.getElementById('cancel-website').addEventListener('click', function (e) {
+                e.preventDefault();
+                document.getElementById('add-website-form').style.display = 'none';
+                document.getElementById('website-name').value = '';
+                document.getElementById('website-url').value = '';
+                document.getElementById('website-icon').value = '';
+            });
+
+            document.getElementById('save-website').addEventListener('click', function (e) {
+                e.preventDefault();
+                const name = document.getElementById('website-name').value.trim();
+                let url = document.getElementById('website-url').value.trim();
+                const icon = document.getElementById('website-icon').value.trim();
+
+                if (!name || !url) {
+                    addSystemMessage('Please enter both a name and URL for the website');
+                    return;
+                }
+
+                // Add https:// if not present
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    url = 'https://' + url;
+                }
+
+                const newWebsite = {
+                    id: Date.now(),
+                    name: name,
+                    url: url,
+                    icon: icon || getDefaultIcon(url)
+                };
+
+                websites.push(newWebsite);
+                localStorage.setItem('csStudentWebsites', JSON.stringify(websites));
+
+                document.getElementById('add-website-form').style.display = 'none';
+                document.getElementById('website-name').value = '';
+                document.getElementById('website-url').value = '';
+                document.getElementById('website-icon').value = '';
+
+                updateWebsites();
+                addSystemMessage(`Added new website: ${name}`);
+            });
+
+            // Communication with iframe
+            window.addEventListener('message', function(event) {
+                // Handle messages from the iframe
+                if (event.data.type === 'taskCompleted') {
+                    const expGain = 10; // Base EXP for any completed task
+                    addExp(expGain);
+                    addSystemMessage(`Task completed! +${expGain} EXP`);
+
+                    // Update streak and totals
+                    const lastCompletionDate = localStorage.getItem('lastCompletionDate');
+                    const today = new Date().toDateString();
+
+                    if (lastCompletionDate !== today) {
+                        // New streak day
+                        const newStreak = streak + 1;
+                        updateStreak(newStreak);
+                        localStorage.setItem('streak', newStreak);
+                        localStorage.setItem('lastCompletionDate', today);
+
+                        // Update consecutive days
+                        const newConsecutiveDays = consecutiveDays + 1;
+                        localStorage.setItem('consecutiveDays', newConsecutiveDays);
+
+                        // Update total quests
+                        const newTotal = totalQuests + 1;
+                        updateTotalQuests(newTotal);
+                        localStorage.setItem('totalQuests', newTotal);
+
+                        if (newStreak > 3) {
+                            addSystemMessage(`Daily streak: ${newStreak} days! Keep it up!`);
+                        }
+                    }
+                }
+            });
+
+            // Check for streak continuation
+            checkStreak();
+
+            // Add welcome message
+            setTimeout(() => {
+                addSystemMessage('Computer Science is no magic. It\'s just practice!');
+            }, 1000);
+        });
+
+        function getDefaultIcon(url) {
+            try {
+                const domain = new URL(url).hostname;
+                return `https://${domain}/favicon.ico`;
+            } catch {
+                return '';
+            }
+        }
+
+        function updateWebsites() {
+            const quickLinksDiv = document.getElementById('quick-links');
+
+            // Clear only user-added websites (keep the default ones)
+            const defaultLinks = Array.from(quickLinksDiv.querySelectorAll('.quick-link-box')).filter(box => {
+                return ['GitHub', 'LeetCode', 'Stack Overflow', 'YouTube'].some(name =>
+                    box.textContent.includes(name)
+                );
+            });
+
+            quickLinksDiv.innerHTML = '';
+
+            // Add back default links
+            defaultLinks.forEach(link => quickLinksDiv.appendChild(link));
+
+            // Add user websites
+            const websites = JSON.parse(localStorage.getItem('csStudentWebsites')) || [];
+            websites.forEach(website => {
+                const websiteBox = document.createElement('div');
+                websiteBox.className = 'quick-link-box';
+                websiteBox.onclick = () => window.open(website.url, '_blank');
+
+                const iconSrc = website.icon || getDefaultIcon(website.url);
+
+                websiteBox.innerHTML = `
+                    ${iconSrc ? `<img src="${iconSrc}" class="quick-link-icon" onerror="this.src='https://www.google.com/favicon.ico'">` :
+                        `<div class="quick-link-icon bg-dungeon-accent flex items-center justify-center rounded-full"><i class="fas fa-globe text-xs"></i></div>`}
+                    <div class="font-bold text-dungeon-text">${website.name}</div>
+                    <div class="text-xs text-dungeon-text opacity-80">${new URL(website.url).hostname}</div>
+                `;
+
+                quickLinksDiv.appendChild(websiteBox);
+            });
+        }
+
+        function calculateMaxExp(level) {
+            return level * 200 + 800; // Exponential growth
+        }
+
+        function updatePlayerStats(level, exp, maxExp) {
+            document.getElementById('player-level').textContent = level;
+            document.getElementById('current-exp').textContent = exp;
+            document.getElementById('max-exp').textContent = maxExp;
+            document.getElementById('exp-bar').style.width = `${(exp / maxExp) * 100}%`;
+            document.getElementById('next-reward-exp').textContent = Math.ceil((exp + 1) / 200) * 200;
+        }
+
+        function addExp(amount) {
+            let currentExp = parseInt(localStorage.getItem('currentExp')) || 0;
+            let playerLevel = parseInt(localStorage.getItem('playerLevel')) || 1;
+            let maxExp = calculateMaxExp(playerLevel);
+            
+            let newExp = currentExp + amount;
+            let newLevel = playerLevel;
+            let newMaxExp = maxExp;
+
+            // Level up check
+            while (newExp >= newMaxExp) {
+                newExp -= newMaxExp;
+                newLevel++;
+                newMaxExp = calculateMaxExp(newLevel);
+                levelUp(newLevel);
+            }
+
+            // Prevent negative EXP
+            if (newExp < 0) newExp = 0;
+
+            // Save and update
+            localStorage.setItem('currentExp', newExp);
+            localStorage.setItem('playerLevel', newLevel);
+            localStorage.setItem('maxExp', newMaxExp);
+
+            updatePlayerStats(newLevel, newExp, newMaxExp);
+        }
+
+        function levelUp(newLevel) {
+            // Update level with animation
+            const levelElement = document.getElementById('player-level');
+            levelElement.classList.add('level-up-animation');
+            setTimeout(() => {
+                levelElement.classList.remove('level-up-animation');
+            }, 1500);
+
+            // Create confetti effect
+            createConfetti();
+
+            // Update stats
+            addSystemMessage(`Congratulations! You reached Level ${newLevel}!`);
+        }
+
+        function createConfetti() {
+            const colors = ['#4f46e5', '#3b82f6', '#10b981', '#f59e0b', '#ec4899'];
+
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = Math.random() * 10 + 5 + 'px';
+                confetti.style.height = Math.random() * 10 + 5 + 'px';
+                confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+
+                document.body.appendChild(confetti);
+
+                // Remove confetti after animation
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+
+        function updateStreak(count) {
+            document.getElementById('streak-count').textContent = count;
+        }
+
+        function updateTotalQuests(count) {
+            document.getElementById('total-quests').textContent = count;
+        }
+
+        function updateProgress() {
+            // This would need to be updated based on iframe communication
+            // Currently just a placeholder
+            document.getElementById('daily-percentage').textContent = `0%`;
+            document.getElementById('progress-bar').style.width = `0%`;
+        }
+
+        function addSystemMessage(text) {
+            const messagesDiv = document.getElementById('system-messages');
+            const message = document.createElement('div');
+            message.className = 'bg-dungeon-dark rounded p-3 text-sm text-dungeon-text border-l-4 border-dungeon-accent';
+            message.innerHTML = `
+                <div class="font-bold text-dungeon-accent">SYSTEM:</div>
+                <div>${text}</div>
+            `;
+            messagesDiv.appendChild(message);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function checkStreak() {
+            const lastCompletionDate = localStorage.getItem('lastCompletionDate');
+            const today = new Date().toDateString();
+
+            if (lastCompletionDate) {
+                const lastDate = new Date(lastCompletionDate);
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+
+                if (lastDate.toDateString() === yesterday.toDateString()) {
+                    // Streak continues
+                    return;
+                } else if (lastDate.toDateString() !== today) {
+                    // Streak broken
+                    localStorage.setItem('streak', 0);
+                    localStorage.setItem('consecutiveDays', 0);
+                    updateStreak(0);
+                    addSystemMessage('Streak broken! Complete a task today to start a new streak.');
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
